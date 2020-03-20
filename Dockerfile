@@ -3,7 +3,8 @@
 # Version 1
 
 # Pull the rhel image from the local repository
-FROM centos7
+#FROM centos7
+FROM amazonlinux
 USER root
 
 MAINTAINER Wilfred Moyo
