@@ -2,15 +2,15 @@ version: 0.2
 phases:
   install:
     commands:
-      - echo install step...
+      - echo Install step...
   pre_build:
     commands:
       - echo logging in to AWS ECR...
       - $(aws ecr get-login --no-include-email --region eu-west-1)
   build:
     commands:
-      - echo build Docker image on `date`
-      - ls -l
+      - echo Build started on `date`
+      - echo Building the Docker image...
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:=latest}
       - REPOSITORY_URI=632628322532.dkr.ecr.eu-west-1.amazonaws.com/tooling-repo/sanportal
@@ -18,7 +18,12 @@ phases:
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
   post_build:
     commands:
-      - echo build Docker image complete `date`
-      - echo push latest Docker images to ECR...
+      - echo Build completed on `date`
+      - echo pushing to repo to ECR...
       - docker push $REPOSITORY_URI:latest
       - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - echo Writing image definitions file...
+      - printf '{"ImageURI":"%s"}' $REPOSITORY_URI:$IMAGE_TAG > imageDetail.json
+  artifacts:
+    files:
+      - imageDetail.json
